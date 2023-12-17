@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% include "carousel.html" %}
+
+{% block content %}
+
+    <!-- START THE FEATURETTES -->
+    <h2 class="text-center h1">Герої не вмирають!</h2>
+
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+      <div class="col-md-7">
+        <h2 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Троє дітей нашого ліцею залишилось без ТАТА</span></h2>
+        <br>
+        <p class="">
+                Під Мар’їнкою Покровського району на Донеччині загинув випускник 2000 р. нашого закладу Юрій Любомирович Іванців. <br><br>
+
+                Найщиріші співчуття батькам Юрія, дружині Юлії, діткам, родині з приводу неповторної втрати. <br><br>
+                
+                Царство Небесне нашому Герою!
+            
+            </p>
+      </div>
+      <div class="col-md-5">
+        <img src="{{ url_for('static', filename='/img/322203153_562722375350017_936612918420082276_n.jpg') }}" style="border-radius: 5px;"  class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390"  alt="">
+        <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 390x390" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">390x390</text></svg> -->
+      </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+      <div class="col-md-7 order-md-2">
+        <h2 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Безжальна війна чорним крилом трагічної звістки приголомшила учасників освітнього процесу Рогатинського ліцею №1</span></h2>
+        <br>
+        <p class="">У боях за волю та незалежність України 12 березня 2022 року загинув уродженець села Дусанів Золочівського району, випускник 1999 року Рогатинської ЗОШ №1 (нині Рогатинського ліцею №1), полум’яний патріот, вірний син своєї землі, український військовослужбовець, підполковник Національної гвардії України, учасник російсько-української війни Лещишин Богдан. <br><br>
+
+                    Президент Володимир Зеленський надав посмертно Богдану звання Героя України і удостоїв ордена “Золота Зірка” (25 квітня 2022) за мужність і героїзм, проявлені у захисті державного суверенітету та територіальної цілісності України, вірність військовій присязі. <br><br>
+            
+                    Висловлюємо щирі співчуття рідним Героя. Світла пам’ять про справжнього патріота, який віддав своє життя за Україну, її кращу долю, навіки залишиться в наших серцях.
+            
+                    Вічна пам’ять та слава захиснику України Богдану Лещишину!</p>
+      </div>
+      <div class="col-md-5 order-md-1">
+        <img src="{{ url_for('static', filename='/img/278713641_1628957397463160_1655437863256439967_n.jpg') }}" style="border-radius: 5px;"  class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390"  alt="">
+
+        <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 390x390" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">390x390</text></svg> -->
+      </div>
+    </div>
+
+    <hr class="featurette-divider">
+{% endblock content %}
