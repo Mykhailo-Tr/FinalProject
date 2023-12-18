@@ -1,11 +1,40 @@
-from flask import Flask, redirect, render_template, url_for, request
+from flask import Flask, redirect, render_template, url_for, request, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
+from werkzeug.exceptions import abort
 from SQL_db import DataBase
+from validation import Validator
 
 
 app = Flask(__name__)
-db = DataBase('database.db')
+# db = DataBase('database.db')
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+app.config["SECRET_KEY"] = "abc"
+db = SQLAlchemy()
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
+class Users(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(250), unique=True, nullable=False)
+    email = db.Column(db.String(250), unique=True, nullable=False)
+    password = db.Column(db.String(250), nullable=False)
+
+
+db.init_app(app)
+
+
+with app.app_context():
+	db.create_all()
+ 
+ 
+@login_manager.user_loader
+def loader_user(user_id):
+	return Users.query.get(user_id)
+
+@app.route("/home")
 @app.route("/index")
 @app.route("/")
 def index():
@@ -22,28 +51,63 @@ def contacts():
     return render_template('contact/contact.html', page='contacts', title='Контакти - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
 
 
-@app.route("/sign-in", methods=["GET", "POST"])
+@app.route("/login", methods=["GET", "POST"])
 def sign_in():
-    if request.method == "GET":
-        return render_template('auth/sign_in.html', title='Увійти - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
-    elif request.method == "POST":
+    if request.method == "POST":
+        user = Users.query.filter_by(
+        username=request.form.get("username")).first()
+        if user.password == request.form.get("password"):
+            login_user(user)
+            return redirect(url_for("index"))
         
-        return render_template('auth/sign_in.html', title='Увійти - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template("auth/sign_in.html")
     
 
-@app.route("/sign-up", methods=["GET", "POST"])
-def sign_up():
-    if request.method == "GET":
-        return render_template('auth/sign_up.html', title='Зареєструватися - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
-    elif request.method == "POST":
+@app.route("/register", methods=["GET", "POST"])
+def sign_up():    
+    if request.method == "POST":
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
-        db.add_user(username, email, password)
-        
-        users = db.get_users()
-        return f"{users}"  
-    
+        try:
+            user_data = Validator(username=username, email=email, password=password)
+        except ValueError as error:
+            flash(f"{error}")
+            return redirect(url_for("sign_up"))
+        except Exception as error:
+            flash(f"Error: {error}")
+            return redirect(url_for("sign_up"))
+        else:
+            try:
+                user = Users(username=user_data.username,
+                            email=user_data.email,
+                            password=user_data.password)
+                db.session.add(user)
+                db.session.commit()
+            except Exception as error:
+                flash(f"Error: {error}")
+                return redirect(url_for("sign_up"))
+            else:
+                return redirect(url_for("sign_in"))
+
+    else:
+        return render_template("auth/sign_up.html", title='Зареєструватися - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+
+
+@app.route("/logout")
+def logout():
+	logout_user()
+	return redirect(url_for("index"))
+
+
+@app.route("/account")
+def account():
+    if current_user.is_authenticated:
+        return render_template("profile/account.html", title="Account home page")
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+
     
 @app.route("/heros")
 def heros():
