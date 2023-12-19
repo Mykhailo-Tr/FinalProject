@@ -1,0 +1,36 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Profile
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            {% if page=='account' %}
+                <a class="dropdown-item rounded-2 active" href="{{ url_for("account") }}">Account</a>
+            {% else %}
+                <a class="dropdown-item rounded-2" href="{{ url_for("account") }}">Account</a>
+            {% endif %}
+        </li>
+        <li>
+            {% if page=='edit_profile' %}
+                <a class="dropdown-item rounded-2 active" href="{{ url_for("edit_profile") }}">Edit Profile</a>
+            {% else %}
+                <a class="dropdown-item rounded-2" href="{{ url_for("edit_profile") }}">Edit Profile</a>
+            {% endif %}
+        </li>
+        <li>
+            {% if page=='edit_profile' %}
+                <a class="dropdown-item rounded-2 active" href="{{ url_for("edit_profile") }}">Edit Profile</a>
+            {% else %}
+                <a class="dropdown-item rounded-2" href="{{ url_for("edit_profile") }}">Edit Profile</a>
+            {% endif %}
+        </li>
+        <li>
+            <hr class="dropdown-divider">
+        </li>
+        <li>
+            <a href="/logout" class="link-danger  .active dropdown-item rounded-2">Logout</a>
+        </li>
+    </ul>
+</div>

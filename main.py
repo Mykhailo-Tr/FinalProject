@@ -1,7 +1,7 @@
-from flask import Flask, redirect, render_template, url_for, request, flash
+from flask import Flask, redirect, render_template, url_for, request, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
-from werkzeug.exceptions import abort
+from werkzeug.exceptions import abort, NotFound
 from SQL_db import DataBase
 from validation import Validator
 
@@ -34,6 +34,7 @@ with app.app_context():
 def loader_user(user_id):
 	return Users.query.get(user_id)
 
+
 @app.route("/home")
 @app.route("/index")
 @app.route("/")
@@ -51,6 +52,26 @@ def contacts():
     return render_template('contact/contact.html', page='contacts', title='Контакти - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
 
 
+@app.route("/heros")
+def heros():
+    return render_template("main/geroi.html", page='index', title='Герої не вмирають! - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+
+
+@app.route("/about/history")
+def history():
+    return render_template('about/history.html', page='about', title='Історія Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+
+
+@app.route("/about/olympiads")
+def olympiads():
+    return render_template('about/olymp.html', page='about', title='Олімпіади та конкурси - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+
+
+@app.route("/about/symbols")
+def symbols():
+    return render_template('about/symbol.html', page='about', title='Символіка Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    
+
 @app.route("/login", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
@@ -58,7 +79,8 @@ def sign_in():
         username=request.form.get("username")).first()
         if user.password == request.form.get("password"):
             login_user(user)
-            return redirect(url_for("index"))
+            session["username"] = request.form.get("username")
+            return redirect(url_for("account"))
         
     return render_template("auth/sign_in.html")
     
@@ -103,30 +125,22 @@ def logout():
 @app.route("/account")
 def account():
     if current_user.is_authenticated:
-        return render_template("profile/account.html", title="Account home page")
+        user_data = {"username": session["username"]}
+        return render_template("profile/account.html", title="Account home page", user_data=user_data, page="account")
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+
+@app.route("/profile/edit")
+@app.route("/account/edit")
+def edit_profile():
+    if current_user.is_authenticated:
+        return render_template("profile/edit.html", title="Edit Profile", page="edit_profile")
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
 
-    
-@app.route("/heros")
-def heros():
-    return render_template("main/geroi.html", page='index', title='Герої не вмирають! - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
-
-
-@app.route("/about/history")
-def history():
-    return render_template('about/history.html', page='about', title='Історія Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
-
-
-@app.route("/about/olympiads")
-def olympiads():
-    return render_template('about/olymp.html', page='about', title='Олімпіади та конкурси - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
-
-
-@app.route("/about/symbols")
-def symbols():
-    return render_template('about/symbol.html', page='about', title='Символіка Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
     
 
 
