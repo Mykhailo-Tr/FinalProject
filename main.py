@@ -4,6 +4,10 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from werkzeug.exceptions import abort, NotFound
 from SQL_db import DataBase
 from validation import Validator
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 app = Flask(__name__)
@@ -75,14 +79,21 @@ def symbols():
 @app.route("/login", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
-        user = Users.query.filter_by(username=).first()
         username=request.form.get("username")
-        if user.password == request.form.get("password"):
-            login_user(user)
-            session["username"] = request.form.get("username")
-            session["password"] = request.form.get("password")
-            session["email"] = Users.query.filter_by(username=session.get("username")).first().email       
-            return redirect(url_for("account"))
+        user = Users.query.filter_by(username=username).first()
+        if user:
+            if user.password == request.form.get("password"):
+                login_user(user)
+                session["username"] = request.form.get("username")
+                session["password"] = request.form.get("password")
+                session["email"] = Users.query.filter_by(username=session.get("username")).first().email       
+                return redirect(url_for("account"))
+            else:
+                flash("Wrong password!")
+                redirect(url_for('sign_in'))
+        else:
+            flash("Wrong username!")
+            redirect(url_for('sign_in'))
         
     return render_template("auth/sign_in.html")
     
