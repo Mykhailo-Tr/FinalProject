@@ -75,8 +75,8 @@ def symbols():
 @app.route("/login", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
-        user = Users.query.filter_by(
-        username=request.form.get("username")).first()
+        user = Users.query.filter_by(username=).first()
+        username=request.form.get("username")
         if user.password == request.form.get("password"):
             login_user(user)
             session["username"] = request.form.get("username")
