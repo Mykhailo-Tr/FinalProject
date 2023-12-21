@@ -7,7 +7,7 @@ from validation import Validator
 
 
 app = Flask(__name__)
-# db = DataBase('database.db')
+# my_db = DataBase('instance/db.sqlite')
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 app.config["SECRET_KEY"] = "abc"
 db = SQLAlchemy()
@@ -80,6 +80,8 @@ def sign_in():
         if user.password == request.form.get("password"):
             login_user(user)
             session["username"] = request.form.get("username")
+            session["password"] = request.form.get("password")
+            session["email"] = Users.query.filter_by(username=session.get("username")).first().email       
             return redirect(url_for("account"))
         
     return render_template("auth/sign_in.html")
@@ -136,7 +138,36 @@ def account():
 @app.route("/account/edit")
 def edit_profile():
     if current_user.is_authenticated:
-        return render_template("profile/edit.html", title="Edit Profile", page="edit_profile")
+        return render_template("profile/edit.html", title="Edit Profile", page="edit_profile", user=session)
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+    
+@app.route("/profile/update", methods=["GET", "POST"])
+@app.route("/account/update", methods=["GET", "POST"])
+def update_profile():
+    if current_user.is_authenticated:
+        if request.method == "POST":
+            try:
+                old_username = session.get("username")
+                new_username = request.form.get("username")
+                new_email = request.form.get("email")
+                
+                Users.query.filter_by(username=old_username).update(
+                    dict(email=new_email, username=new_username))
+
+                session["username"] = new_username
+                session["email"] = new_email
+                db.session.commit()
+                flash("User Updated Successfully! ")
+                return redirect(url_for('account'))
+            except Exception as error:
+                flash(f"Error: {error}")
+                return redirect(url_for('edit_profile'))
+
+                
+                
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
