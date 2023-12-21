@@ -164,16 +164,50 @@ def update_profile():
                 return redirect(url_for('account'))
             except Exception as error:
                 flash(f"Error: {error}")
-                return redirect(url_for('edit_profile'))
-
-                
-                
+                return redirect(url_for('edit_profile'))   
+        else:
+            return redirect(url_for('edit_profile'))        
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
 
-    
 
+@app.route("/profile/change_password", methods=["GET", "POST"])
+@app.route("/account/change_password", methods=["GET", "POST"])
+def change_password():
+    if current_user.is_authenticated:
+        if request.method == "POST":
+            try:
+                old_password = session.get("password")
+                new_password = request.form.get("password")
+                username = session.get("username") 
+
+                if old_password == new_password:
+                    raise ValueError("New password cannot be the same as your current password.")
+                
+                Users.query.filter_by(username=username).update(
+                    dict(password=new_password))
+                
+                db.session.commit()
+                
+                flash("Password Updated Successfully!")
+                return redirect(url_for('account'))
+            
+            except ValueError as error:
+                flash(f"{error}")
+                return redirect(url_for('change_password'))  
+            
+            except Exception as error:
+                flash(f"Error: {error}")
+                return redirect(url_for('change_password'))   
+            
+        elif request.method == "GET":
+            return render_template('profile/password.html', page='change_pass')   
+             
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
 
 
 if __name__ == '__main__':
