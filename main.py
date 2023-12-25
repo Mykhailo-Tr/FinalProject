@@ -6,9 +6,7 @@ from SQL_db import DataBase
 from validation import Validator
 import logging
 
-
 logging.basicConfig(level=logging.INFO)
-
 
 app = Flask(__name__)
 # my_db = DataBase('instance/db.sqlite')
@@ -27,16 +25,28 @@ class Users(UserMixin, db.Model):
     password = db.Column(db.String(250), nullable=False)
 
 
-db.init_app(app)
+    def __repr__(self):
+        return '<User %r>' % self.username
 
+
+db.init_app(app) # TODO: Fix this
 
 with app.app_context():
-	db.create_all()
- 
- 
+    db.create_all()
+
+
 @login_manager.user_loader
 def loader_user(user_id):
-	return Users.query.get(user_id)
+    return Users.query.get(user_id)
+
+
+
+def logout():
+    """Log out the user."""
+    session['isLogged'] = False
+    session['username'] = None
+    session['password'] = None
+    session['email'] = None
 
 
 @app.route("/home")
@@ -74,19 +84,21 @@ def olympiads():
 @app.route("/about/symbols")
 def symbols():
     return render_template('about/symbol.html', page='about', title='Символіка Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
-    
+
 
 @app.route("/login", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
-        username=request.form.get("username")
+        username = request.form.get("username")
         user = Users.query.filter_by(username=username).first()
+        print(user)
         if user:
             if user.password == request.form.get("password"):
                 login_user(user)
+                session['isLogged'] = True
                 session["username"] = request.form.get("username")
                 session["password"] = request.form.get("password")
-                session["email"] = Users.query.filter_by(username=session.get("username")).first().email       
+                session["email"] = Users.query.filter_by(username=session.get("username")).first().email
                 return redirect(url_for("account"))
             else:
                 flash("Wrong password!")
@@ -94,12 +106,12 @@ def sign_in():
         else:
             flash("Wrong username!")
             redirect(url_for('sign_in'))
-        
+
     return render_template("auth/sign_in.html")
-    
+
 
 @app.route("/register", methods=["GET", "POST"])
-def sign_up():    
+def sign_up():
     if request.method == "POST":
         username = request.form.get("username")
         email = request.form.get("email")
@@ -115,8 +127,8 @@ def sign_up():
         else:
             try:
                 user = Users(username=user_data.username,
-                            email=user_data.email,
-                            password=user_data.password)
+                             email=user_data.email,
+                             password=user_data.password)
                 db.session.add(user)
                 db.session.commit()
             except Exception as error:
@@ -130,9 +142,10 @@ def sign_up():
 
 
 @app.route("/logout")
-def logout():
-	logout_user()
-	return redirect(url_for("index"))
+def logout_from_account():
+    logout_user()
+    logout()
+    return redirect(url_for("index"))
 
 
 @app.route("/account")
@@ -143,7 +156,7 @@ def account():
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
-    
+
 
 @app.route("/profile/edit")
 @app.route("/account/edit")
@@ -153,8 +166,8 @@ def edit_profile():
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
-    
-    
+
+
 @app.route("/profile/update", methods=["GET", "POST"])
 @app.route("/account/update", methods=["GET", "POST"])
 def update_profile():
@@ -164,7 +177,7 @@ def update_profile():
                 old_username = session.get("username")
                 new_username = request.form.get("username")
                 new_email = request.form.get("email")
-                
+
                 Users.query.filter_by(username=old_username).update(
                     dict(email=new_email, username=new_username))
 
@@ -175,9 +188,9 @@ def update_profile():
                 return redirect(url_for('account'))
             except Exception as error:
                 flash(f"Error: {error}")
-                return redirect(url_for('edit_profile'))   
+                return redirect(url_for('edit_profile'))
         else:
-            return redirect(url_for('edit_profile'))        
+            return redirect(url_for('edit_profile'))
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
@@ -191,34 +204,48 @@ def change_password():
             try:
                 old_password = session.get("password")
                 new_password = request.form.get("password")
-                username = session.get("username") 
+                username = session.get("username")
 
                 if old_password == new_password:
                     raise ValueError("New password cannot be the same as your current password.")
-                
+
                 Users.query.filter_by(username=username).update(
                     dict(password=new_password))
-                
+
                 db.session.commit()
-                
+
                 flash("Password Updated Successfully!")
                 return redirect(url_for('account'))
-            
+
             except ValueError as error:
                 flash(f"{error}")
-                return redirect(url_for('change_password'))  
-            
+                return redirect(url_for('change_password'))
+
             except Exception as error:
                 flash(f"Error: {error}")
-                return redirect(url_for('change_password'))   
-            
+                return redirect(url_for('change_password'))
+
         elif request.method == "GET":
-            return render_template('profile/password.html', page='change_pass')   
-             
+            return render_template('profile/password.html', page='change_pass')
+
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
     
+    
+@app.route("/profile/delete")
+@app.route("/account/delete")
+def delete_account():
+    if current_user.is_authenticated:
+        user = Users.query.filter_by(username=session['username']).delete()
+        logout_user()
+        logout()
+        db.session.commit()
+        flash("Your account deleted!")
+        return redirect(url_for("index"))
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
 
 
 if __name__ == '__main__':

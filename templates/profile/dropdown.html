@@ -30,7 +30,13 @@
             <hr class="dropdown-divider">
         </li>
         <li>
-            <a href="/logout" class="link-danger  .active dropdown-item rounded-2">Logout</a>
+            <a href="{{ url_for('logout_from_account') }}" class="link-danger  .active dropdown-item rounded-2">Logout</a>
+        </li>
+        <li>
+            <hr class="dropdown-divider">
+        </li>
+        <li>
+            <a href="{{ url_for('delete_account') }}" class="link-danger .active dropdown-item rounded-2">Delete Account</a>
         </li>
     </ul>
 </div>
