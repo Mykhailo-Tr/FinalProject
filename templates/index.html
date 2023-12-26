@@ -3,87 +3,35 @@
 {% include 'carousel.html' %}
 
 {% block content %}
-
 <div>
-  <!-- Three columns of text below the carousel -->
-  <div class="row">
-    <div class="col-lg-4">
-      <img src="{{ url_for('static', filename='img/герої.jpg') }}" alt="" class="bd-placeholder-img rounded-circle" width="140" height="140">
-      <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
-      <h2 class="fw-normal">Герої не вмирають!</h2>
-      <p>Під Мар’їнкою Покровського району на Донеччині загинув випускник 2000 р. нашого закладу...</p>
-      <br>
-      <p><a class="btn btn-secondary" href="{{ url_for('heros') }}">View details &raquo;</a></p>
-    </div><!-- /.col-lg-4 -->
-    <div class="col-lg-4">
-      <img src="{{ url_for('static', filename='img/630dc6cf6d32f763940632.jpg') }}" alt="" class="bd-placeholder-img rounded-circle " width="140" height="140">
-      <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
-      <h2 class="fw-normal">Волонтерська діяльність</h2>
-      <p>Дитячі малюнки і подаруночки воїнам- це невеличкий вклад у велику справу - нашу Перемогу!</p>
-      <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
-    </div><!-- /.col-lg-4 -->
-    <div class="col-lg-4">
-      <img src="{{ url_for('static', filename='img/війна.png')}}" alt="" class="bd-placeholder-img rounded-circle " width="140" height="140">
-      <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
-      <h2 class="fw-normal">Стоп війні</h2>
-      <p>Інформація про психологічну допомогу в умовах війни Івано-Франківська область</p>
-      <br>
-      <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
-    </div><!-- /.col-lg-4 -->
-  </div><!-- /.row -->
-  <br>
-
-  <hr class="featurette-divider">
-
-  <!-- START THE FEATURETTES -->
-  <h2 class="text-center h1">Новини</h2>
-
-
-  <hr class="featurette-divider">
-
-  <div class="row featurette">
-    <div class="col-md-7">
-      <h2 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Шевченківські дні. 2023-03-08</span></h2>
-      <br>
-      <p class="">Традиційно у березневі дні, ми вшановуємо нашого кобзаря та пропрока Тараса Григоровича Шевченка. Образ поета є символом української державності, української нації, національної єдності українців, символом поступу до внутрішньої свободи, чесності, правди, самовираження, символом, що надихає жити, боротися, кохати - як вічна святиня, як уособлення найвищого розуму і непізнаного духу, як невмируща душа і пам'ять української нації,адже "Тарасове слово, вічне і пророче".</p>
-      <p class="link h4 text-center">
-          <a target="_blank" href="https://www.facebook.com/photo?fbid=651833423614498&set=pcb.651834516947722">Фото</a> 
-          <a target="_blank" href="https://www.facebook.com/rogschool1/videos/1975245882808730">Відео</a> 
-          <a target="_blank" href="https://www.facebook.com/rogschool1/videos/120548837638153">Відео</a> 
-      </p>
-      <p class="h4 text-center">Тематична книжкова виставка " Весна починається з Шевченка"</p>
-    </div>
-    <div class="col-md-5">
-      <img src="{{ url_for('static', filename='img/taras.jpg') }}" style="border-radius: 5px;"  class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390"  alt="">
-      <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 390x390" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">390x390</text></svg> -->
-    </div>
-  </div>
-
-  <hr class="featurette-divider">
-
-  <div class="row featurette">
-    <div class="col-md-7 order-md-2">
-      <h2 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Екскурсія в історичний музей. 2023-02-24</span></h2>
-      <br>
-      <p class="">Пластуни ліцею разом з своїм виховником Рошкевич Я.С. та вчителем історії: Женчук Н.В відвідали мальовниче село Заланів, звідки походить О́сип Мики́тка.Він був українським військовим діячем, сотником УСС, генерал-майором УГА. Учні мали можливість послухати цікаві розповіді від жителів села та ознайомитись з цікавими експонатими історичного музею автором ідеї та засновником якого є Мирон Мельник.Про музей Заланова можна розповідати і розповідати. Та найкраще – самотужки побачити все оте опільське багатство, яке сільська громада створювала в різні часи і зберегла для нащадків.</p>
-      <br>
-      <p class="">Дякуємо всім причетним, за можливість подорожувати історичними стежками рідного краю.</p>
-      <p class="link h4 text-center">
-        <a target="_blank" href="https://www.facebook.com/photo/?fbid=647425180721989&set=pcb.647425380721969">Фото</a> 
-    </p>
-    </div>
-    <div class="col-md-5 order-md-1">
-      <img src="{{ url_for('static', filename='img/musiem.jpg') }}" style="border-radius: 5px;"  class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390"  alt="">
-
-      <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="390" height="390" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 390x390" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">390x390</text></svg> -->
-    </div>
-  </div>
-
-  <hr class="featurette-divider">
-
-
-  <!-- /END THE FEATURETTES -->
-
+      <!-- Three columns of text below the carousel -->
+      <div class="row">
+        <div class="col-lg-4">
+          <img src="{{ url_for('static', filename='img/герої.jpg') }}" alt="" class="bd-placeholder-img rounded-circle" width="140" height="140">
+          <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
+          <h2 class="fw-normal">Герої не вмирають!</h2>
+          <p>Під Мар’їнкою Покровського району на Донеччині загинув випускник 2000 р. нашого закладу...</p>
+          <br>
+          <p><a class="btn btn-secondary" href="{{ url_for('heros') }}">View details &raquo;</a></p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-lg-4">
+          <img src="{{ url_for('static', filename='img/630dc6cf6d32f763940632.jpg') }}" alt="" class="bd-placeholder-img rounded-circle " width="140" height="140">
+          <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
+          <h2 class="fw-normal">Волонтерська діяльність</h2>
+          <p>Дитячі малюнки і подаруночки воїнам- це невеличкий вклад у велику справу - нашу Перемогу!</p>
+          <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+        </div><!-- /.col-lg-4 -->
+        <div class="col-lg-4">
+          <img src="{{ url_for('static', filename='img/війна.png')}}" alt="" class="bd-placeholder-img rounded-circle " width="140" height="140">
+          <!-- <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg> -->
+          <h2 class="fw-normal">Стоп війні</h2>
+          <p>Інформація про психологічну допомогу в умовах війни Івано-Франківська область</p>
+          <br>
+          <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+        </div><!-- /.col-lg-4 -->
+      </div><!-- /.row -->
 </div>
+
+{% include "news.html" %}
 
 {% endblock%}

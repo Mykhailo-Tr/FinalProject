@@ -2,16 +2,25 @@ from flask import Flask, redirect, render_template, url_for, request, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from werkzeug.exceptions import abort, NotFound
+from werkzeug.utils import secure_filename
 from markupsafe import escape
 from SQL_db import DataBase
 from validation import Validator
 import logging
+import os
+
 
 logging.basicConfig(level=logging.INFO)
 
+
+UPLOAD_FOLDER = '/static/img'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+
 app = Flask(__name__)
-# my_db = DataBase('instance/db.sqlite')
+site_db = DataBase('database.db')
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "abc"
 db = SQLAlchemy()
 
@@ -40,6 +49,11 @@ def loader_user(user_id):
     return Users.query.get(user_id)
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 def logout():
     """Log out the user."""
     session['isLogged'] = False
@@ -52,7 +66,8 @@ def logout():
 @app.route("/index")
 @app.route("/")
 def index():
-    return render_template("index.html", page='index', title='Головна - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    news = site_db.get_news()
+    return render_template("index.html", page='index', title='Головна - РОГАТИНСЬКИЙ ЛІЦЕЙ №1', news=news)
 
 
 @app.route("/about")
@@ -245,7 +260,99 @@ def delete_account():
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
+    
+    
+    
+@app.route("/site/edit/news")
+def edit_news():
+    if current_user.is_authenticated:
+        news = site_db.get_news()
+        return render_template('editSite/news/news.html', news=news, edit_mode=True)
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+    
+@app.route('/site/edit/news/create', methods=['GET', 'POST'])
+def create_news():
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            title = request.form.get('title')
+            content = request.form.get('content')
+            
+            if 'file' not in request.files:
+                print(request.files, '-'*100)
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
 
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(f"static/img/{filename}")
+                
+            if not title:
+                flash('Title is required!')
+            else:
+                img_path = f"img/{filename}"
+                site_db.add_news(title, content, img_path)
+                return redirect(url_for('edit_news'))
+
+        return render_template('editSite/news/create.html')
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+
+
+@app.route("/site/edit/news/edit/<int:id>" , methods=["POST", "GET"])
+def edit_news_post(id):
+    if current_user.is_authenticated:
+        post = site_db.get_news_post(id)
+
+        if request.method == 'POST':
+            title = request.form.get('title')
+            content = request.form.get('content')
+
+            if not title:
+                flash('Title is required!')
+            else:
+                site_db.update_news(id, title, content)
+                return redirect(url_for('edit_news'))
+
+        return render_template('editSite/news/edit.html', post=post)
+
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+    
+@app.route("/site/edit/news/delete/<int:id>", methods=["POST"])
+def delete_news(id):
+    if current_user.is_authenticated:
+        post = site_db.get_news_post(id)
+        site_db.delete_news_post(id)
+        flash('"{}" was successfully deleted!'.format(post[2]))
+        return redirect(url_for('edit_news'))
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+
+
+
+@app.route("/site/preview/news")
+def preview_news():
+    if current_user.is_authenticated:
+        news = site_db.get_news()
+        return render_template('editSite/news/news.html', news=news, edit_mode=True)
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in")) 
+    
+
+        
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)

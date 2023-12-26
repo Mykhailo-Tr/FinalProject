@@ -7,9 +7,16 @@
 <br>
 <h1>You are logged in as <span class="mark">{{ user_data.get("username") }}</span> </h1>
 
-<div class="container">                                         
+<div class="container navbar navbar-expand-md">                                         
 
-    {% include "profile/dropdown.html" %}
+    <div class="px-1">
+        {% include "profile/dropdown.html" %}
+
+    </div>
+    <div class="px-1">
+        {% include "profile/siteDropdown.html" %}
+
+    </div>
 
 </div>
 

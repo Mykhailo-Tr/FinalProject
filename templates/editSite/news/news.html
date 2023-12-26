@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+
+<br><br><br>
+<center>
+    <div class="center container navbar navbar-expand-md">
+        <div class="px-2">
+            <p class="btn btn-primary">
+                <a href="{{ url_for('preview_news') }}" class="btn btn-primar">
+                    Preview News Page
+                </a>
+            </p> 
+        </div>
+        <div class="px-2">
+            <p class="btn btn-primary">
+                <a href="{{ url_for('create_news') }}" class="btn btn-primar">
+                    Create News
+                </a>
+            </p>
+        </div>
+    </div>  
+</center>
+
+
+
+{% include "news.html" %}
+
+{% endblock%}
