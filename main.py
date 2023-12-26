@@ -2,6 +2,7 @@ from flask import Flask, redirect, render_template, url_for, request, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from werkzeug.exceptions import abort, NotFound
+from markupsafe import escape
 from SQL_db import DataBase
 from validation import Validator
 import logging
@@ -27,6 +28,8 @@ class Users(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+
 
 
 db.init_app(app) # TODO: Fix this
