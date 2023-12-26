@@ -6,25 +6,13 @@
     </button>
     <ul class="dropdown-menu">
         <li>
-            {% if page=='account' %}
-                <a class="dropdown-item rounded-2 active" href="{{ url_for("account") }}">Account</a>
-            {% else %}
-                <a class="dropdown-item rounded-2" href="{{ url_for("account") }}">Account</a>
-            {% endif %}
+            <a class="dropdown-item rounded-2 {% if page=='account' %}active{% endif %}" href="{{ url_for("account") }}">Account</a>
         </li>
         <li>
-            {% if page=='edit_profile' %}
-                <a class="dropdown-item rounded-2 active" href="{{ url_for("edit_profile") }}">Edit Profile</a>
-            {% else %}
-                <a class="dropdown-item rounded-2" href="{{ url_for("edit_profile") }}">Edit Profile</a>
-            {% endif %}
+            <a class="dropdown-item rounded-2 {% if page=='edit_profile' %}active{% endif %}" href="{{ url_for("edit_profile") }}">Edit Profile</a>
         </li>
         <li>
-            {% if page=='change_pass' %}
-                <a class="dropdown-item rounded-2 active" href="{{ url_for("change_password") }}">Change Password</a>
-            {% else %}
-                <a class="dropdown-item rounded-2" href="{{ url_for("change_password") }}">Change Password</a>
-            {% endif %}
+            <a class="dropdown-item rounded-2 {% if page=='change_pass' %}active{% endif %}" href="{{ url_for("change_password") }}">Change Password</a>
         </li>
         <li>
             <hr class="dropdown-divider">

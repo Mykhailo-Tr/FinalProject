@@ -85,38 +85,17 @@
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
 
             <li class="nav-item">
-                {% if page=='index' %}
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('index') }}">Головна</a>
-                {% else %}
-                    <a class="nav-link" aria-current="page" href="{{ url_for('index') }}">Головна</a>
-                {% endif %}
+                  <a class="nav-link {% if page=='index' %}active{% endif %}" aria-current="page" href="{{ url_for('index') }}">Головна</a>
             </li>
             <li class="nav-item">
-                {% if page=='about' %}
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('about') }}">Про Ліцей</a>
-                {% else %}
-                    <a class="nav-link" aria-current="page" href="{{ url_for('about') }}">Про Ліцей</a>
-                {% endif %}
+                  <a class="nav-link {% if page=='about' %}active{% endif %}" aria-current="page" href="{{ url_for('about') }}">Про Ліцей</a>
             <li class="nav-item">
-                {% if page=='studets' %}
-                    <a class="nav-link active" aria-current="page" href="#">Учням</a>
-                {% else %}
-                    <a class="nav-link" aria-current="page" href="#">Учням</a>
-                {% endif %}
+                  <a class="nav-link {% if page=='students' %}active{% endif %}" aria-current="page" href="#">Учням</a>            </li>
+            <li class="nav-item">
+                  <a class="nav-link {% if page=='perents' %}active{% endif %}"aria-current="page" href="#">Батькам</a>
             </li>
             <li class="nav-item">
-                {% if page=='perents' %}
-                    <a class="nav-link active" aria-current="page" href="#">Батькам</a>
-                {% else %}
-                    <a class="nav-link" aria-current="page" href="#">Батькам</a>
-                {% endif %}
-            </li>
-            <li class="nav-item">
-                {% if page=='contacts' %}
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('contacts') }}">Контакти</a>
-                {% else %}
-                    <a class="nav-link" aria-current="page" href="{{ url_for('contacts') }}">Контакти</a>
-                {% endif %}
+                  <a class="nav-link {% if page=='contacts' %}active{% endif %}" aria-current="page" href="{{ url_for('contacts') }}">Контакти</a>
             </li>
         </ul>
 

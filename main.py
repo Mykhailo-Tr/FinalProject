@@ -25,14 +25,11 @@ class Users(UserMixin, db.Model):
     email = db.Column(db.String(250), unique=True, nullable=False)
     password = db.Column(db.String(250), nullable=False)
 
-
     def __repr__(self):
         return '<User %r>' % self.username
 
 
-
-
-db.init_app(app) # TODO: Fix this
+db.init_app(app)
 
 with app.app_context():
     db.create_all()
@@ -41,7 +38,6 @@ with app.app_context():
 @login_manager.user_loader
 def loader_user(user_id):
     return Users.query.get(user_id)
-
 
 
 def logout():
@@ -240,7 +236,7 @@ def change_password():
 @app.route("/account/delete")
 def delete_account():
     if current_user.is_authenticated:
-        user = Users.query.filter_by(username=session['username']).delete()
+        Users.query.filter_by(username=session['username']).delete()
         logout_user()
         logout()
         db.session.commit()
