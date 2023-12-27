@@ -44,7 +44,6 @@ class DataBase:
             self.cursor.execute('DELETE FROM users WHERE id=(?)', [user_id])
             conn.commit()
             
-            
     def get_email(self, username: str):
         with self.connect as conn:
             return self.cursor.execute('''SELECT email FROM users WHERE username=(?)''', [username]).fetchone()
@@ -60,7 +59,6 @@ class DataBase:
         with self.connect as connect:
             query = '''INSERT INTO news (title, content, img_path) VALUES(?, ?, ?)'''
             self.cursor.execute(query, (title, content, img_path))
-            
             connect.commit()
                    
     def get_news_post(self, post_id: int):

@@ -262,7 +262,6 @@ def delete_account():
         return redirect(url_for("sign_in"))
     
     
-    
 @app.route("/site/edit/news")
 def edit_news():
     if current_user.is_authenticated:
@@ -281,7 +280,6 @@ def create_news():
             content = request.form.get('content')
             
             if 'file' not in request.files:
-                print(request.files, '-'*100)
                 flash('No file part')
                 return redirect(request.url)
             file = request.files['file']

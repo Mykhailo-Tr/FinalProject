@@ -5,6 +5,10 @@
 config.py
 
 
+###DATABASE###
+database.db
+
+
 ### Flask ###
 instance/*
 !instance/.gitignore
