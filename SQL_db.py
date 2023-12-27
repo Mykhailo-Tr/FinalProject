@@ -50,7 +50,7 @@ class DataBase:
 
 
     def get_news(self):
-        """Get one news by ID from the database."""
+        """Get all news from database."""
         with self.connect:
             return self.cursor.execute('''SELECT * FROM news''').fetchall()
         
@@ -78,3 +78,36 @@ class DataBase:
         with self.connect as connect:
             self.cursor.execute('DELETE FROM news WHERE id = ?', (post_id,))
             connect.commit()
+    
+    
+    def get_olympiads(self):
+        """Get all olympiads from database."""
+        with self.connect:
+            return self.cursor.execute('''SELECT * from olympiads''').fetchall()
+        
+    def get_olympiad_post(self, post_id: int):
+        """Get data about one specific olympiad."""
+        with self.connect:
+            return self.cursor.execute('''SELECT * FROM olympiads WHERE id=?''', [post_id]).fetchone()
+        
+    def add_olympiad(self, content: str, img_path: str):
+        """Add a new olympiad to the database."""
+        with self.connect as connect:
+            query = '''INSERT INTO olympiads (content, img_path) VALUES(?, ?)'''
+            self.cursor.execute(query, (content, img_path))
+            connect.commit()
+            
+    def update_olympiad(self, post_id: int, content: str):
+        """Update an existing olympiads post in the database."""
+        with self.connect as connect:
+            query = '''UPDATE olympiads SET content = ? WHERE id = ?'''
+            self.cursor.execute(query, [content, post_id])
+            connect.commit()
+            
+    def delete_olympiad_post(self, post_id: int):
+        """Delete a news post from the database."""
+        with self.connect as connect:
+            self.cursor.execute('DELETE FROM olympiads WHERE id = ?', (post_id,))
+            connect.commit()
+    
+    

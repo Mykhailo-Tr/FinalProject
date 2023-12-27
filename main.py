@@ -52,6 +52,23 @@ def loader_user(user_id):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
+           
+def upload_file():
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    
+    file = request.files['file']
+
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(f"static/img/{filename}")
+        img_path = f"img/{filename}"
+        return img_path
 
 
 def logout():
@@ -92,7 +109,12 @@ def history():
 
 @app.route("/about/olympiads")
 def olympiads():
-    return render_template('about/olymp.html', page='about', title='Олімпіади та конкурси - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    olymp = site_db.get_olympiads()
+    print(olymp)
+    return render_template('about/olymp.html', 
+                           page='about', 
+                           title='Олімпіади та конкурси - РОГАТИНСЬКИЙ ЛІЦЕЙ №1', 
+                           olymp=olymp)
 
 
 @app.route("/about/symbols")
@@ -279,23 +301,13 @@ def create_news():
             title = request.form.get('title')
             content = request.form.get('content')
             
-            if 'file' not in request.files:
-                flash('No file part')
-                return redirect(request.url)
-            file = request.files['file']
-
-            if file.filename == '':
-                flash('No selected file')
-                return redirect(request.url)
-            
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(f"static/img/{filename}")
-                
+            img_path = upload_file()
+            if type(img_path) not in (str, None):
+                return img_path
+              
             if not title:
                 flash('Title is required!')
             else:
-                img_path = f"img/{filename}"
                 site_db.add_news(title, content, img_path)
                 return redirect(url_for('edit_news'))
 
@@ -348,6 +360,75 @@ def preview_news():
     else:
         flash("You are not logged in!")
         return redirect(url_for("sign_in")) 
+    
+    
+@app.route("/site/edit/olympiads")
+def edit_olymp():
+    if current_user.is_authenticated:
+        olymp = site_db.get_olympiads()
+        return render_template('editSite/olympiads/olympiads.html', olymp=olymp, edit_mode=True)
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+
+@app.route('/site/edit/olympiads/create', methods=['GET', 'POST'])
+def create_olymp():
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            content = request.form.get('content')
+            
+            img_path = upload_file()
+            if type(img_path) not in (str, None):
+                return img_path
+              
+            if not content:
+                flash('Content is required!')
+            else:
+                site_db.add_olympiad(content, img_path)
+                return redirect(url_for('edit_olymp'))
+
+        return render_template('editSite/olympiads/create.html')
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+
+@app.route("/site/edit/olympiads/edit/<int:id>" , methods=["POST", "GET"])
+def edit_olymp_post(id):
+    if current_user.is_authenticated:
+        post = site_db.get_olympiad_post(id)
+
+        if request.method == 'POST':
+            content = request.form.get('content')
+
+            if not content:
+                flash('Content is required!')
+            else:
+                site_db.update_olympiad(id, content)
+                return redirect(url_for('edit_olymp'))
+
+        return render_template('editSite/olympiads/edit.html', post=post)
+
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+    
+    
+@app.route("/site/edit/olympiads/delete/<int:id>", methods=["POST"])
+def delete_olymp(id):
+    if current_user.is_authenticated:
+        post = site_db.get_olympiad_post(id)
+        site_db.delete_olympiad_post(id)
+        flash('"{}" was successfully deleted!'.format(post[2]))
+        return redirect(url_for('edit_olymp'))
+    else:
+        flash("You are not logged in!")
+        return redirect(url_for("sign_in"))
+
+    
+    
+    
     
 
         

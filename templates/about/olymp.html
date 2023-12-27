@@ -4,60 +4,6 @@
 
 {% block content %}
 
-    <!-- Three columns of text below the carousel -->
-  
-    <h2 class="text-center">Переможці Конкурсів та Олімпіад</h2>
-
-    <!-- START THE FEATURETTES -->
-    <br>
-    <h3 class="text-center h3">2022 - 2023р</h3>
-    <hr class="featurette-divider">
-
-    <div class="row featurette text-center">
-        <div class="col-md-7">
-            <h3 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Вітаємо із зайнятим 3 місцем на III етапі Всеукраїнської олімпіади з української мови і літератури -ученицю 10-Б класу Федунь Елізу та наставників Бандуру Н.М., Слабу Г.І. Творчих здобутків!!!</span></h3>
-            <!-- <p class="lead"></p> -->
-            
-        </div>
-        <div class="col-md-5">
-            <img style="border-radius: 15px;"  src="{{ url_for('static', filename='img/330005407_869674037629255_6893394858260797295_n.jpg') }}" alt=""  width="280" class="img-fluid">
-            <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg> -->
-        </div>
-    </div>
-
-    <hr class="featurette-divider">
-
-
-    <div class="row featurette text-center">
-        <div class="col-md-7 order-md-2">
-            <h3 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Вітаємо учня 7 класу Третяка Михайла з зайнятим 3 місцем на lll етапі Всеукраїнської олімпіади з інформатики та наставника-вчителя інформатики Замулу О.О.</span></h3>
-            <!-- <p class="lead"></p> -->
-            
-        </div>
-        <div class="col-md-5">
-            <img style="border-radius: 15px;"  src="{{ url_for('static', filename='img/i.jpg') }}" alt=""  width="280" class="img-fluid">
-            <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg> -->
-        </div>
-    </div>
-
-    <hr class="featurette-divider">
-
-
-    <div class="row featurette text-center">
-        <div class="col-md-7">
-            <h3 class="featurette-heading fw-normal lh-1"><span class="text-muted h3">Вітаємо ученицю 9 класу Кобильник Світлану з зайнятим 3 місцем на lll етапі Всеукраїнської олімпіади з англійськоі мови та її наставника- вчителя англійськоі мови Завгородню Т.М.</span></h3>
-            <!-- <p class="lead"></p> -->
-            
-        </div>
-        <div class="col-md-5">
-            <img style="border-radius: 15px;"  src="{{ url_for('static', filename='img/326561935_891504278814986_1071826300911940728_n.jpg') }}" alt=""  width="280" class="img-fluid">
-            <!-- <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg> -->
-        </div>
-    </div>
-    <br>
-<br>
-
-
-    <!-- /END THE FEATURETTES -->
+{% include "about/olympiads.html" %}
 
 {% endblock content %}

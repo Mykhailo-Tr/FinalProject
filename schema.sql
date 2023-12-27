@@ -7,3 +7,12 @@ CREATE TABLE news (
     content TEXT NOT NULL,
     img_path TEXT
 );
+
+DROP TABLE IF EXISTS olympiads;
+
+CREATE TABLE olympiads(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    content TEXT NOT NULL,
+    img_path TEXT
+);

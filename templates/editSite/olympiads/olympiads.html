@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br><br>
+<center>
+    <div class="center container navbar navbar-expand-md">
+        <div class="px-2">
+            <p class="btn btn-primary">
+                <a href="{{ url_for('create_olymp') }}" class="btn btn-primar">
+                    Create Olympiad
+                </a>
+            </p>
+        </div>
+    </div>  
+</center>
+
+
+
+{% include "about/olympiads.html" %}
+
+{% endblock%}
