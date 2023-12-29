@@ -4,21 +4,19 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 from werkzeug.exceptions import abort, NotFound
 from werkzeug.utils import secure_filename
 from markupsafe import escape
+from functools import wraps
 from SQL_db import DataBase
 from validation import Validator
-import logging
-from config import LOG_FILE, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DATABASE_FILE, SQLALCHEMY_DATABASE
-
-
-logging.basicConfig(level=logging.INFO, filename=LOG_FILE)
-
+from logger import logger
+from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DATABASE_FILE, SQLALCHEMY_DATABASE
 
 
 app = Flask(__name__)
-site_db = DataBase(DATABASE_FILE)
+app.logger = logger
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "abc"
+site_db = DataBase(DATABASE_FILE)
 db = SQLAlchemy()
 
 login_manager = LoginManager()
@@ -32,7 +30,7 @@ class Users(UserMixin, db.Model):
     password = db.Column(db.String(250), nullable=False)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return f'<User {self.username}, {self.email}>'
 
 
 db.init_app(app)
@@ -44,6 +42,27 @@ with app.app_context():
 @login_manager.user_loader
 def loader_user(user_id):
     return Users.query.get(user_id)
+
+
+def handle_error(error_page):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            
+                try:
+                    return func(*args, **kwargs)
+                except ValueError as error:
+                    app.logger.error(f"ValueError: {error}")
+                    flash(f"ValueError: {error}")
+                    return redirect(url_for(error_page))
+                except Exception as error:
+                    app.logger.error(f"Error during page access: {error}")
+                    flash(f"ValueError: {error}")
+                    return redirect(url_for(error_page))
+
+        return wrapper
+    return decorator
+
 
 
 def allowed_file(filename):
@@ -124,7 +143,8 @@ def sign_in():
     if request.method == "POST":
         username = request.form.get("username")
         user = Users.query.filter_by(username=username).first()
-        print(user)
+        app.logger.info(f"Attempting to sign in user: {username}")
+
         if user:
             if user.password == request.form.get("password"):
                 login_user(user)
@@ -135,9 +155,11 @@ def sign_in():
                 return redirect(url_for("account"))
             else:
                 flash("Wrong password!")
+                app.logger.warning(f"Failed login attempt for user '{username}' due to wrong password.")
                 redirect(url_for('sign_in'))
         else:
             flash("Wrong username!")
+            app.logger.warning(f"Failed login attempt for user '{username}' due to wrong username.")
             redirect(url_for('sign_in'))
 
     return render_template("auth/sign_in.html")
@@ -153,9 +175,11 @@ def sign_up():
             user_data = Validator(username=username, email=email, password=password)
         except ValueError as error:
             flash(f"{error}")
+            app.logger.warning(f"Registration failed for user '{username}' due to validation error.")
             return redirect(url_for("sign_up"))
         except Exception as error:
             flash(f"Error: {error}")
+            app.logger.error(f"Error during user registration: {error}")
             return redirect(url_for("sign_up"))
         else:
             try:
@@ -164,8 +188,10 @@ def sign_up():
                              password=user_data.password)
                 db.session.add(user)
                 db.session.commit()
+                app.logger.info(f"User '{username}' successfully registered.")
             except Exception as error:
                 flash(f"Error: {error}")
+                app.logger.error(f"Error during user registration: {error}")
                 return redirect(url_for("sign_up"))
             else:
                 return redirect(url_for("sign_in"))
@@ -176,87 +202,90 @@ def sign_up():
 
 @app.route("/logout")
 def logout_from_account():
-    logout_user()
-    logout()
+    try:
+        logout_user()
+        logout()
+        app.logger.info("User successfully logged out.")
+    except Exception as error:
+        app.logger.error(f"Error during logout: {error}")
     return redirect(url_for("index"))
 
-
+@handle_error
 @app.route("/account")
 def account():
     if current_user.is_authenticated:
         user_data = {"username": session["username"]}
+        app.logger.info(f"User '{session['username']}' is accessing their account page.")
         return render_template("profile/account.html", title="Account home page", user_data=user_data, page="account")
     else:
         flash("You are not logged in!")
+        app.logger.warning("Unauthorized access to account page. Redirecting to sign_in.")
         return redirect(url_for("sign_in"))
 
 
+@handle_error
 @app.route("/profile/edit")
 @app.route("/account/edit")
 def edit_profile():
     if current_user.is_authenticated:
+        app.logger.info(f"User '{session['username']}' is accessing the edit profile page.")
         return render_template("profile/edit.html", title="Edit Profile", page="edit_profile", user=session)
     else:
         flash("You are not logged in!")
+        app.logger.warning("Unauthorized access to edit profile page. Redirecting to sign_in.")
         return redirect(url_for("sign_in"))
 
 
+@handle_error
 @app.route("/profile/update", methods=["GET", "POST"])
 @app.route("/account/update", methods=["GET", "POST"])
 def update_profile():
     if current_user.is_authenticated:
         if request.method == "POST":
-            try:
-                old_username = session.get("username")
-                new_username = request.form.get("username")
-                new_email = request.form.get("email")
+            old_username = session.get("username")
+            old_email = session.get("email")
+            new_username = request.form.get("username")
+            new_email = request.form.get("email")
 
-                Users.query.filter_by(username=old_username).update(
-                    dict(email=new_email, username=new_username))
+            user = Users.query.filter_by(username=old_username)
+            user.update(dict(email=new_email, username=new_username))
 
-                session["username"] = new_username
-                session["email"] = new_email
-                db.session.commit()
-                flash("User Updated Successfully! ")
-                return redirect(url_for('account'))
-            except Exception as error:
-                flash(f"Error: {error}")
-                return redirect(url_for('edit_profile'))
+            session["username"] = new_username
+            session["email"] = new_email
+            db.session.commit()
+            app.logger.info(f"{new_username}, {new_email} updated profile successfully, old data: {old_username}, {old_email} ")
+            flash("User Updated Successfully! ")
+            return redirect(url_for('account'))
         else:
             return redirect(url_for('edit_profile'))
     else:
+        app.logger.warning("Unauthorized access to update profile page. Redirecting to sign_in.")
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
 
 
+
 @app.route("/profile/change_password", methods=["GET", "POST"])
 @app.route("/account/change_password", methods=["GET", "POST"])
+@handle_error('change_password')
 def change_password():
     if current_user.is_authenticated:
         if request.method == "POST":
-            try:
-                old_password = session.get("password")
-                new_password = request.form.get("password")
-                username = session.get("username")
+            old_password = session.get("password")
+            new_password = request.form.get("password")
+            username = session.get("username")
 
-                if old_password == new_password:
-                    raise ValueError("New password cannot be the same as your current password.")
+            if old_password == new_password:
+                raise ValueError("New password cannot be the same as your current password.")
 
-                Users.query.filter_by(username=username).update(
-                    dict(password=new_password))
+            Users.query.filter_by(username=username).update(
+                dict(password=new_password))
 
-                db.session.commit()
+            db.session.commit()
 
-                flash("Password Updated Successfully!")
-                return redirect(url_for('account'))
-
-            except ValueError as error:
-                flash(f"{error}")
-                return redirect(url_for('change_password'))
-
-            except Exception as error:
-                flash(f"Error: {error}")
-                return redirect(url_for('change_password'))
+            app.logger.info(f"User '{username}' changed their password successfully. {old_password} : {new_password}")
+            flash("Password Updated Successfully!")
+            return redirect(url_for('account'))
 
         elif request.method == "GET":
             return render_template('profile/password.html', page='change_pass')

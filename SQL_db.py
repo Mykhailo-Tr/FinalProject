@@ -1,5 +1,5 @@
 import sqlite3
-import config
+from logger import logger
 
 
 class DataBase:
@@ -9,13 +9,17 @@ class DataBase:
         if cls._instance is None:
             cls._instance = super(DataBase, cls).__new__(cls)
         return cls._instance
-    
-    
+
     def __init__(self, db_filename: str):
         self.filename = db_filename
         self.connect = sqlite3.connect(db_filename, check_same_thread=False)
         self.cursor = self.connect.cursor()
         
+        logger.info(f"DataBase instance initialized for {self.filename}")
+
+        
+    def __str__(self) -> str:
+        return f"DataBase instance for {self.filename}"
     
     def get_news(self):
         """Get all news from database."""
