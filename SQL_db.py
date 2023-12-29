@@ -109,5 +109,3 @@ class DataBase:
         with self.connect as connect:
             self.cursor.execute('DELETE FROM olympiads WHERE id = ?', (post_id,))
             connect.commit()
-    
-    

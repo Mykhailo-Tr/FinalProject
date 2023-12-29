@@ -7,19 +7,16 @@ from markupsafe import escape
 from SQL_db import DataBase
 from validation import Validator
 import logging
-import os
+from config import LOG_FILE, UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DATABASE_FILE, SQLALCHEMY_DATABASE
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, filename=LOG_FILE)
 
-
-UPLOAD_FOLDER = '/static/img'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
 app = Flask(__name__)
-site_db = DataBase('database.db')
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+site_db = DataBase(DATABASE_FILE)
+app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config["SECRET_KEY"] = "abc"
 db = SQLAlchemy()
@@ -426,12 +423,6 @@ def delete_olymp(id):
         flash("You are not logged in!")
         return redirect(url_for("sign_in"))
 
-    
-    
-    
-    
-
-        
 
 if __name__ == '__main__':
     app.run(debug=True, port=5555)
