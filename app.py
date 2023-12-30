@@ -1,7 +1,7 @@
 from flask import Flask
 from logger import logger
 from SQL_db import DataBase
-from json_db import JsonDatabase
+from JSON_db import JsonDatabase
 from flask_sqlalchemy import SQLAlchemy
 from config import SQLALCHEMY_DATABASE, UPLOAD_FOLDER, DATABASE_FILE, JSON_FILE
 
