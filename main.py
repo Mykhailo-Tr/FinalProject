@@ -50,7 +50,7 @@ def handle_error(error_page = 'index'):
         def wrapper(*args, **kwargs):
             
                 try:
-                    return func(*args, **kwargs)
+                    return func()
                 except ValueError as error:
                     app.logger.error(f"ValueError: {error}")
                     flash(f"ValueError: {error}")
@@ -65,9 +65,10 @@ def handle_error(error_page = 'index'):
 
 
 def check_auth(func):
+    @wraps(func)
     def inner(*args, **kwargs):
         if current_user.is_authenticated:
-            return func(args)
+            return func()
         else:
             app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
             flash("You are not logged in!")
@@ -223,7 +224,7 @@ def logout_from_account():
     return redirect(url_for("index"))
 
 
-@app.route("/account")
+@app.route("/account", endpoint='account')
 @handle_error('index')
 @check_auth
 def account():
@@ -233,234 +234,276 @@ def account():
 
 
 
-@handle_error
-@app.route("/profile/edit")
-@app.route("/account/edit")
+
+@app.route("/profile/edit", endpoint='edit_profile')
+@app.route("/account/edit", endpoint='edit_profile')
+@handle_error('account')
+@check_auth
 def edit_profile():
-    if current_user.is_authenticated:
-        app.logger.info(f"User '{session['username']}' is accessing the edit profile page.")
-        return render_template("profile/edit.html", title="Edit Profile", page="edit_profile", user=session)
-    else:
-        flash("You are not logged in!")
-        app.logger.warning("Unauthorized access to edit profile page. Redirecting to sign_in.")
-        return redirect(url_for("sign_in"))
+    app.logger.info(f"User '{session['username']}' is accessing the edit profile page.")
+    return render_template("profile/edit.html", title="Edit Profile", page="edit_profile", user=session)
 
 
-@handle_error
+
 @app.route("/profile/update", methods=["GET", "POST"])
 @app.route("/account/update", methods=["GET", "POST"])
+@handle_error('account')
+@check_auth
 def update_profile():
-    if current_user.is_authenticated:
-        if request.method == "POST":
-            old_username = session.get("username")
-            old_email = session.get("email")
-            new_username = request.form.get("username")
-            new_email = request.form.get("email")
+    if request.method == "POST":
+        old_username = session.get("username")
+        old_email = session.get("email")
+        new_username = request.form.get("username")
+        new_email = request.form.get("email")
 
-            user = Users.query.filter_by(username=old_username)
-            user.update(dict(email=new_email, username=new_username))
+        user = Users.query.filter_by(username=old_username)
+        user.update(dict(email=new_email, username=new_username))
 
-            session["username"] = new_username
-            session["email"] = new_email
-            db.session.commit()
-            app.logger.info(f"{new_username}, {new_email} updated profile successfully, old data: {old_username}, {old_email} ")
-            flash("User Updated Successfully! ")
-            return redirect(url_for('account'))
-        else:
-            return redirect(url_for('edit_profile'))
+        session["username"] = new_username
+        session["email"] = new_email
+        db.session.commit()
+        app.logger.info(f"{new_username}, {new_email} updated profile successfully, old data: {old_username}, {old_email} ")
+        flash("User Updated Successfully! ")
+        return redirect(url_for('account'))
     else:
-        app.logger.warning("Unauthorized access to update profile page. Redirecting to sign_in.")
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
+        return redirect(url_for('edit_profile'))
+
 
 
 
 @app.route("/profile/change_password", methods=["GET", "POST"])
 @app.route("/account/change_password", methods=["GET", "POST"])
 @handle_error('change_password')
+@check_auth
 def change_password():
-    if current_user.is_authenticated:
-        if request.method == "POST":
-            old_password = session.get("password")
-            new_password = request.form.get("password")
-            username = session.get("username")
+    if request.method == "POST":
+        old_password = session.get("password")
+        new_password = request.form.get("password")
+        username = session.get("username")
 
-            if old_password == new_password:
-                raise ValueError("New password cannot be the same as your current password.")
+        if old_password == new_password:
+            raise ValueError("New password cannot be the same as your current password.")
 
-            Users.query.filter_by(username=username).update(
-                dict(password=new_password))
+        Users.query.filter_by(username=username).update(
+            dict(password=new_password))
 
-            db.session.commit()
+        db.session.commit()
 
-            app.logger.info(f"User '{username}' changed their password successfully. {old_password} : {new_password}")
-            flash("Password Updated Successfully!")
-            return redirect(url_for('account'))
+        app.logger.info(f"User '{username}' changed their password successfully. {old_password} : {new_password}")
+        flash("Password Updated Successfully!")
+        return redirect(url_for('account'))
 
-        elif request.method == "GET":
-            return render_template('profile/password.html', page='change_pass')
+    elif request.method == "GET":
+        return render_template('profile/password.html', page='change_pass')
 
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
-    
     
 @app.route("/profile/delete")
 @app.route("/account/delete")
+@handle_error('account')
+@check_auth
 def delete_account():
-    if current_user.is_authenticated:
-        Users.query.filter_by(username=session['username']).delete()
-        logout_user()
-        logout()
-        db.session.commit()
-        flash("Your account deleted!")
-        return redirect(url_for("index"))
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
-    
+    Users.query.filter_by(username=session['username']).delete()
+    logout_user()
+    logout()
+    db.session.commit()
+    app.logger.info(f"{request.remote_addr}-{session['username']} : deleted account!")
+    flash("Your account deleted!")
+    return redirect(url_for("index"))
+
+
     
 @app.route("/site/edit/news")
+@handle_error('account')
+@check_auth
 def edit_news():
-    if current_user.is_authenticated:
-        news = site_db.get_news()
-        return render_template('editSite/news/news.html', news=news, edit_mode=True)
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
+    news = site_db.get_news()
+    app.logger.info(f"{request.remote_addr}-{session['username']} : accessing.")
+    return render_template('editSite/news/news.html', news=news, edit_mode=True)
+
     
     
 @app.route('/site/edit/news/create', methods=['GET', 'POST'])
+@handle_error('account')
+@check_auth
 def create_news():
-    if current_user.is_authenticated:
-        if request.method == 'POST':
-            title = request.form.get('title')
-            content = request.form.get('content')
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        
+        img_path = upload_file()
+        if type(img_path) not in (str, None):
+            return img_path
             
-            img_path = upload_file()
-            if type(img_path) not in (str, None):
-                return img_path
-              
-            if not title:
-                flash('Title is required!')
-            else:
-                site_db.add_news(title, content, img_path)
-                return redirect(url_for('edit_news'))
+        if not title:
+            flash('Title is required!')
+        else:
+            site_db.add_news(title, content, img_path)
+            flash(f"Created new news: {title}")
+            app.logger.info(f"{request.remote_addr}-{session['username']} : created news : [title: {title}, img: {img_path}]")
+            return redirect(url_for('edit_news'))
 
-        return render_template('editSite/news/create.html')
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
+
+    return render_template('editSite/news/create.html')
 
 
 @app.route("/site/edit/news/edit/<int:id>" , methods=["POST", "GET"])
 def edit_news_post(id):
-    if current_user.is_authenticated:
-        post = site_db.get_news_post(id)
+    try:
+        if current_user.is_authenticated:
+            post = site_db.get_news_post(id)
 
-        if request.method == 'POST':
-            title = request.form.get('title')
-            content = request.form.get('content')
+            if request.method == 'POST':
+                title = request.form.get('title')
+                content = request.form.get('content')
 
-            if not title:
-                flash('Title is required!')
-            else:
-                site_db.update_news(id, title, content)
-                return redirect(url_for('edit_news'))
+                if not title:
+                    flash('Title is required!')
+                else:
+                    site_db.update_news(id, title, content)
+                    app.logger.info(f"{request.remote_addr}-{session['username']} : edited news : [title: {title}, id: {id}]")
+                    return redirect(url_for('edit_news'))
 
-        return render_template('editSite/news/edit.html', post=post)
-
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
-    
-    
+            return render_template('editSite/news/edit.html', post=post)
+        else:
+            app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
+            flash("You are not logged in!")
+            return redirect(url_for("sign_in"))
+    except ValueError as error:
+        app.logger.error(f"ValueError: {error}")
+        print(error)
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+    except Exception as error:
+        app.logger.error(f"Error during page access: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+        
+ 
 @app.route("/site/edit/news/delete/<int:id>", methods=["POST"])
 def delete_news(id):
-    if current_user.is_authenticated:
-        post = site_db.get_news_post(id)
-        site_db.delete_news_post(id)
-        flash('"{}" was successfully deleted!'.format(post[2]))
-        return redirect(url_for('edit_news'))
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
-
+    try:
+        if current_user.is_authenticated:
+            post = site_db.get_news_post(id)
+            site_db.delete_news_post(id)
+            flash('"{}" was successfully deleted!'.format(post[2]))
+            app.logger.info(f"{request.remote_addr}-{session['username']} : deleted news <id: {id}>")
+            return redirect(url_for('edit_news'))
+        else:
+            app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
+            flash("You are not logged in!")
+            return redirect(url_for("sign_in"))
+        
+    except ValueError as error:
+        app.logger.error(f"ValueError: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+    except Exception as error:
+        app.logger.error(f"Error during page access: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+        
 
 
 @app.route("/site/preview/news")
+@handle_error('account')
+@check_auth
 def preview_news():
-    if current_user.is_authenticated:
-        news = site_db.get_news()
-        return render_template('editSite/news/news.html', news=news, edit_mode=True)
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in")) 
-    
+    news = site_db.get_news()
+    return render_template('editSite/news/news.html', news=news, edit_mode=True)
+
     
 @app.route("/site/edit/olympiads")
+@handle_error('account')
+@check_auth
 def edit_olymp():
-    if current_user.is_authenticated:
-        olymp = site_db.get_olympiads()
-        return render_template('editSite/olympiads/olympiads.html', olymp=olymp, edit_mode=True)
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
-    
+    olymp = site_db.get_olympiads()
+    app.logger.info(f"{request.remote_addr}-{session['username']} : accessing to edit olympiads.")
+    return render_template('editSite/olympiads/olympiads.html', olymp=olymp, edit_mode=True)
+
 
 @app.route('/site/edit/olympiads/create', methods=['GET', 'POST'])
+@handle_error('account')
+@check_auth
 def create_olymp():
-    if current_user.is_authenticated:
-        if request.method == 'POST':
-            content = request.form.get('content')
+    if request.method == 'POST':
+        content = request.form.get('content')
+        
+        img_path = upload_file()
+        if type(img_path) not in (str, None):
+            return img_path
             
-            img_path = upload_file()
-            if type(img_path) not in (str, None):
-                return img_path
-              
-            if not content:
-                flash('Content is required!')
-            else:
-                site_db.add_olympiad(content, img_path)
-                return redirect(url_for('edit_olymp'))
+        if not content:
+            flash('Content is required!')
+        else:
+            site_db.add_olympiad(content, img_path)
+            flash(f"Created olympiad content: {content}")
+            app.logger.info(f"{request.remote_addr}-{session['username']} : created olympiad img: {img_path}")
+            return redirect(url_for('edit_olymp'))
 
-        return render_template('editSite/olympiads/create.html')
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
+    return render_template('editSite/olympiads/create.html')
+
     
 
 @app.route("/site/edit/olympiads/edit/<int:id>" , methods=["POST", "GET"])
 def edit_olymp_post(id):
-    if current_user.is_authenticated:
-        post = site_db.get_olympiad_post(id)
+    try:
+        if current_user.is_authenticated:
+            post = site_db.get_olympiad_post(id)
 
-        if request.method == 'POST':
-            content = request.form.get('content')
+            if request.method == 'POST':
+                content = request.form.get('content')
 
-            if not content:
-                flash('Content is required!')
-            else:
-                site_db.update_olympiad(id, content)
-                return redirect(url_for('edit_olymp'))
+                if not content:
+                    flash('Content is required!')
+                else:
+                    site_db.update_olympiad(id, content)
+                    flash(f"Edited olympiad")
+                    app.logger.info(f"{request.remote_addr}-{session['username']} : edited olympiad <id: {id}>")
+                    return redirect(url_for('edit_olymp'))
 
-        return render_template('editSite/olympiads/edit.html', post=post)
-
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
+            return render_template('editSite/olympiads/edit.html', post=post)
+        
+        else:
+            app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
+            flash("You are not logged in!")
+            return redirect(url_for("sign_in"))
+        
+    except ValueError as error:
+        app.logger.error(f"ValueError: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
     
+    except Exception as error:
+        app.logger.error(f"Error during page access: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+        
     
 @app.route("/site/edit/olympiads/delete/<int:id>", methods=["POST"])
 def delete_olymp(id):
-    if current_user.is_authenticated:
-        post = site_db.get_olympiad_post(id)
-        site_db.delete_olympiad_post(id)
-        flash('"{}" was successfully deleted!'.format(post[2]))
-        return redirect(url_for('edit_olymp'))
-    else:
-        flash("You are not logged in!")
-        return redirect(url_for("sign_in"))
+    try:
+        if current_user.is_authenticated:
+            post = site_db.get_olympiad_post(id)
+            site_db.delete_olympiad_post(id)
+            flash('"{}" was successfully deleted!'.format(post[2]))
+            app.logger.info(f"{request.remote_addr}-{session['username']} : deleted olympiad <id: {id}>")
+            return redirect(url_for('edit_olymp'))
+        
+        else:
+            app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
+            flash("You are not logged in!")
+            return redirect(url_for("sign_in"))
+        
+    except ValueError as error:
+        app.logger.error(f"ValueError: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+    
+    except Exception as error:
+        app.logger.error(f"Error during page access: {error}")
+        flash(f"ValueError: {error}")
+        return redirect(url_for('account'))
+
 
 
 if __name__ == '__main__':
