@@ -42,37 +42,37 @@ def index():
 
 @app.route("/about")
 def about():
-    return render_template('about/index.html', page='about', title='Про Ліцей - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template('about/index.html', page='about', title=titles.get_title('about'))
 
 
 @app.route("/contacts")
 def contacts():
-    return render_template('contact/contact.html', page='contacts', title='Контакти - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template('contact/contact.html', page='contacts', title=titles.get_title('contacts'))
 
 
 @app.route("/heroes")
 def heros():
-    return render_template("main/geroi.html", page='index', title='Герої не вмирають! - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template("main/geroi.html", page='index', title=titles.get_title('heroes'))
 
 
 @app.route("/about/history")
 def history():
-    return render_template('about/history.html', page='about', title='Історія Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template('about/history.html', page='about', title=titles.get_title('history'))
 
 
 @app.route("/about/olympiads")
 def olympiads():
     olymp = site_db.get_olympiads()
-    print(olymp)
+    title = titles.get_title('olympiads')
     return render_template('about/olymp.html', 
                            page='about', 
-                           title='Олімпіади та конкурси - РОГАТИНСЬКИЙ ЛІЦЕЙ №1', 
+                           title=title, 
                            olymp=olymp)
 
 
-@app.route("/about/symbols")
+@app.route("/about/symbolics")
 def symbols():
-    return render_template('about/symbol.html', page='about', title='Символіка Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template('about/symbol.html', page='about', title=titles.get_title('symbolics'))
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -99,7 +99,7 @@ def sign_in():
             app.logger.warning(f"Failed login attempt for user '{username}' due to wrong username.")
             redirect(url_for('sign_in'))
 
-    return render_template("auth/sign_in.html", title='Вхід - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+    return render_template("auth/sign_in.html", title=titles.get_title('login'))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -134,7 +134,7 @@ def sign_up():
                 return redirect(url_for("sign_in"))
 
     else:
-        return render_template("auth/sign_up.html", title='Зареєструватися - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
+        return render_template("auth/sign_up.html", title=titles.get_title('register'))
 
 
 @app.route("/logout")
@@ -154,7 +154,12 @@ def logout_from_account():
 def account():
     user_data = {"username": session["username"]}
     app.logger.info(f"User '{session['username']}' is accessing their account page.")
-    return render_template("profile/account.html", title="Account home page", user_data=user_data, page="account")
+    title = titles.get_title('account')
+    return render_template("profile/account.html",
+                           title=title,
+                           user_data=user_data,
+                           page="account")
+
 
 @app.route("/profile/edit", endpoint='edit_profile')
 @app.route("/account/edit", endpoint='edit_profile')
@@ -162,7 +167,11 @@ def account():
 @check_auth
 def edit_profile():
     app.logger.info(f"User '{session['username']}' is accessing the edit profile page.")
-    return render_template("profile/edit.html", title="Edit Profile", page="edit_profile", user=session)
+    title = titles.get_title('edit_profile')
+    return render_template("profile/edit.html",
+                           title=title,
+                           page="edit_profile",
+                           user=session)
 
 
 @app.route("/profile/update", methods=["GET", "POST"])
@@ -212,7 +221,9 @@ def change_password():
         return redirect(url_for('account'))
 
     elif request.method == "GET":
-        return render_template('profile/password.html', page='change_pass')
+        return render_template('profile/password.html',
+                               page='change_pass',
+                               title=titles.get_title('change_password'))
 
     
 @app.route("/profile/delete")
@@ -234,11 +245,11 @@ def delete_account():
 @check_auth
 def edit_news():
     news = site_db.get_news()
+    title = titles.get_title('edit_news')
     app.logger.info(f"{request.remote_addr}-{session['username']} : accessing.")
-    return render_template('editSite/news/news.html', news=news, edit_mode=True)
+    return render_template('editSite/news/news.html', news=news, edit_mode=True, title=title)
 
-    
-    
+
 @app.route('/site/edit/news/create', methods=['GET', 'POST'])
 @handle_error('account')
 @check_auth
@@ -259,11 +270,10 @@ def create_news():
             app.logger.info(f"{request.remote_addr}-{session['username']} : created news : [title: {title}, img: {img_path}]")
             return redirect(url_for('edit_news'))
 
+    return render_template('editSite/news/create.html', title=titles.get_title('create_news'))
 
-    return render_template('editSite/news/create.html')
 
-
-@app.route("/site/edit/news/edit/<int:id>" , methods=["POST", "GET"])
+@app.route("/site/edit/news/edit/<int:id>", methods=["POST", "GET"])
 def edit_news_post(id):
     try:
         if current_user.is_authenticated:
@@ -280,11 +290,15 @@ def edit_news_post(id):
                     app.logger.info(f"{request.remote_addr}-{session['username']} : edited news : [title: {title}, id: {id}]")
                     return redirect(url_for('edit_news'))
 
-            return render_template('editSite/news/edit.html', post=post)
+            else:
+                title = titles.get_title('edit_news_post')
+                return render_template('editSite/news/edit.html', post=post, title=title)
+
         else:
             app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
             flash("You are not logged in!")
             return redirect(url_for("sign_in"))
+
     except ValueError as error:
         app.logger.error(f"ValueError: {error}")
         print(error)
@@ -320,7 +334,6 @@ def delete_news(id):
         return redirect(url_for('account'))
         
 
-
 @app.route("/site/preview/news")
 @handle_error('account')
 @check_auth
@@ -333,9 +346,13 @@ def preview_news():
 @handle_error('account')
 @check_auth
 def edit_olymp():
+    title = titles.get_title('edit_olympiads')
     olymp = site_db.get_olympiads()
     app.logger.info(f"{request.remote_addr}-{session['username']} : accessing to edit olympiads.")
-    return render_template('editSite/olympiads/olympiads.html', olymp=olymp, edit_mode=True)
+    return render_template('editSite/olympiads/olympiads.html',
+                           olymp=olymp,
+                           edit_mode=True,
+                           title=title)
 
 
 @app.route('/site/edit/olympiads/create', methods=['GET', 'POST'])
@@ -357,9 +374,8 @@ def create_olymp():
             app.logger.info(f"{request.remote_addr}-{session['username']} : created olympiad img: {img_path}")
             return redirect(url_for('edit_olymp'))
 
-    return render_template('editSite/olympiads/create.html')
+    return render_template('editSite/olympiads/create.html', title=titles.get_title('create_olympiad'))
 
-    
 
 @app.route("/site/edit/olympiads/edit/<int:id>" , methods=["POST", "GET"])
 def edit_olymp_post(id):
@@ -378,7 +394,9 @@ def edit_olymp_post(id):
                     app.logger.info(f"{request.remote_addr}-{session['username']} : edited olympiad <id: {id}>")
                     return redirect(url_for('edit_olymp'))
 
-            return render_template('editSite/olympiads/edit.html', post=post)
+            return render_template('editSite/olympiads/edit.html',
+                                   post=post,
+                                   title=titles.get_title('edit_olympiad_post'))
         
         else:
             app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
@@ -420,7 +438,6 @@ def delete_olymp(id):
         app.logger.error(f"Error during page access: {error}")
         flash(f"ValueError: {error}")
         return redirect(url_for('account'))
-
 
 
 if __name__ == '__main__':

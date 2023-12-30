@@ -5,6 +5,7 @@
     "heroes": "Герої не вмирають! - РОГАТИНСЬКИЙ ЛІЦЕЙ №1",
     "history": "Історія Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1",
     "olympiads": "Олімпіади та конкурси - РОГАТИНСЬКИЙ ЛІЦЕЙ №1",
+    "symbolics": "Символіка Ліцею - РОГАТИНСЬКИЙ ЛІЦЕЙ №1",
     "login": "Вхід - РОГАТИНСЬКИЙ ЛІЦЕЙ №1",
     "register": "Зареєструватися - РОГАТИНСЬКИЙ ЛІЦЕЙ №1",
     "account": "Account home page",
@@ -15,5 +16,5 @@
     "edit_news_post": "Edit Post",
     "edit_olympiads": "Edit Olympiads",
     "create_olympiad": "Create Olympiad",
-    "edit_olympiad_post": "Edit Post",
+    "edit_olympiad_post": "Edit Post"
 }
