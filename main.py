@@ -1,21 +1,17 @@
-from flask import Flask, redirect, render_template, url_for, request, flash, session
+from flask import redirect, render_template, url_for, request, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from werkzeug.exceptions import abort, NotFound
 from werkzeug.utils import secure_filename
 from markupsafe import escape
-from functools import wraps
 from SQL_db import DataBase
 from validation import Validator
-from logger import logger
-from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS, DATABASE_FILE, SQLALCHEMY_DATABASE
+from decorators import handle_error, check_auth
+from config import ALLOWED_EXTENSIONS, DATABASE_FILE
+
+from app import app
 
 
-app = Flask(__name__)
-app.logger = logger
-app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config["SECRET_KEY"] = "abc"
 site_db = DataBase(DATABASE_FILE)
 db = SQLAlchemy()
 
@@ -42,39 +38,6 @@ with app.app_context():
 @login_manager.user_loader
 def loader_user(user_id):
     return Users.query.get(user_id)
-
-
-def handle_error(error_page = 'index'):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            
-                try:
-                    return func()
-                except ValueError as error:
-                    app.logger.error(f"ValueError: {error}")
-                    flash(f"ValueError: {error}")
-                    return redirect(url_for(error_page))
-                except Exception as error:
-                    app.logger.error(f"Error during page access: {error}")
-                    flash(f"ValueError: {error}")
-                    return redirect(url_for(error_page))
-
-        return wrapper
-    return decorator
-
-
-def check_auth(func):
-    @wraps(func)
-    def inner(*args, **kwargs):
-        if current_user.is_authenticated:
-            return func()
-        else:
-            app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
-            flash("You are not logged in!")
-            return redirect(url_for("sign_in"))
-        
-    return inner
 
 
 
