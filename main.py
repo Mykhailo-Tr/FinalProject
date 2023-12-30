@@ -44,7 +44,7 @@ def loader_user(user_id):
     return Users.query.get(user_id)
 
 
-def handle_error(error_page):
+def handle_error(error_page = 'index'):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -62,6 +62,18 @@ def handle_error(error_page):
 
         return wrapper
     return decorator
+
+
+def check_auth(func):
+    def inner(*args, **kwargs):
+        if current_user.is_authenticated:
+            return func(args)
+        else:
+            app.logger.warning(f"{request.remote_addr}: Unauthorized access to page. Redirecting to sign_in.")
+            flash("You are not logged in!")
+            return redirect(url_for("sign_in"))
+        
+    return inner
 
 
 
@@ -210,17 +222,15 @@ def logout_from_account():
         app.logger.error(f"Error during logout: {error}")
     return redirect(url_for("index"))
 
-@handle_error
+
 @app.route("/account")
+@handle_error('index')
+@check_auth
 def account():
-    if current_user.is_authenticated:
-        user_data = {"username": session["username"]}
-        app.logger.info(f"User '{session['username']}' is accessing their account page.")
-        return render_template("profile/account.html", title="Account home page", user_data=user_data, page="account")
-    else:
-        flash("You are not logged in!")
-        app.logger.warning("Unauthorized access to account page. Redirecting to sign_in.")
-        return redirect(url_for("sign_in"))
+    user_data = {"username": session["username"]}
+    app.logger.info(f"User '{session['username']}' is accessing their account page.")
+    return render_template("profile/account.html", title="Account home page", user_data=user_data, page="account")
+
 
 
 @handle_error
