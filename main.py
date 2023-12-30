@@ -1,33 +1,16 @@
 from flask import redirect, render_template, url_for, request, flash, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
+from flask_login import LoginManager, login_user, logout_user, current_user
 from werkzeug.exceptions import abort, NotFound
-from werkzeug.utils import secure_filename
 from markupsafe import escape
-from SQL_db import DataBase
 from validation import Validator
 from decorators import handle_error, check_auth
-from config import ALLOWED_EXTENSIONS, DATABASE_FILE
+from core import upload_file
+from models import Users
+from app import app, db, site_db, titles
 
-from app import app
-
-
-site_db = DataBase(DATABASE_FILE)
-db = SQLAlchemy()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-
-class Users(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(250), unique=True, nullable=False)
-    email = db.Column(db.String(250), unique=True, nullable=False)
-    password = db.Column(db.String(250), nullable=False)
-
-    def __repr__(self):
-        return f'<User {self.username}, {self.email}>'
-
 
 db.init_app(app)
 
@@ -38,29 +21,6 @@ with app.app_context():
 @login_manager.user_loader
 def loader_user(user_id):
     return Users.query.get(user_id)
-
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-           
-           
-def upload_file():
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
-    
-    file = request.files['file']
-
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(f"static/img/{filename}")
-        img_path = f"img/{filename}"
-        return img_path
 
 
 def logout():
@@ -76,7 +36,8 @@ def logout():
 @app.route("/")
 def index():
     news = site_db.get_news()
-    return render_template("index.html", page='index', title='Головна - РОГАТИНСЬКИЙ ЛІЦЕЙ №1', news=news)
+    title = titles.get_title('index')
+    return render_template("index.html", page='index', title=title, news=news)
 
 
 @app.route("/about")
@@ -89,7 +50,7 @@ def contacts():
     return render_template('contact/contact.html', page='contacts', title='Контакти - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
 
 
-@app.route("/heros")
+@app.route("/heroes")
 def heros():
     return render_template("main/geroi.html", page='index', title='Герої не вмирають! - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
 
@@ -138,7 +99,7 @@ def sign_in():
             app.logger.warning(f"Failed login attempt for user '{username}' due to wrong username.")
             redirect(url_for('sign_in'))
 
-    return render_template("auth/sign_in.html")
+    return render_template("auth/sign_in.html", title='Вхід - РОГАТИНСЬКИЙ ЛІЦЕЙ №1')
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -195,9 +156,6 @@ def account():
     app.logger.info(f"User '{session['username']}' is accessing their account page.")
     return render_template("profile/account.html", title="Account home page", user_data=user_data, page="account")
 
-
-
-
 @app.route("/profile/edit", endpoint='edit_profile')
 @app.route("/account/edit", endpoint='edit_profile')
 @handle_error('account')
@@ -205,7 +163,6 @@ def account():
 def edit_profile():
     app.logger.info(f"User '{session['username']}' is accessing the edit profile page.")
     return render_template("profile/edit.html", title="Edit Profile", page="edit_profile", user=session)
-
 
 
 @app.route("/profile/update", methods=["GET", "POST"])
@@ -230,8 +187,6 @@ def update_profile():
         return redirect(url_for('account'))
     else:
         return redirect(url_for('edit_profile'))
-
-
 
 
 @app.route("/profile/change_password", methods=["GET", "POST"])
@@ -272,7 +227,6 @@ def delete_account():
     app.logger.info(f"{request.remote_addr}-{session['username']} : deleted account!")
     flash("Your account deleted!")
     return redirect(url_for("index"))
-
 
     
 @app.route("/site/edit/news")
