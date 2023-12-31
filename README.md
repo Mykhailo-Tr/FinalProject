@@ -4,6 +4,7 @@
 </h1>
 
 <h4 align="center">A school website with the possibility of editing and a registration system build on <a href="https://pypi.org/project/Flask" target="_blank">Flask</a>.</h4>
+
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
