@@ -2,7 +2,7 @@ from flask import redirect, render_template, url_for, request, flash, session
 from flask_login import LoginManager, login_user, logout_user, current_user
 from validation import Validator
 from decorators import handle_error, check_auth
-from core import upload_file
+from core import upload_file, remove_file
 from models import Users
 from app import app, db, site_db, titles
 
@@ -313,6 +313,7 @@ def delete_news(id):
     try:
         if current_user.is_authenticated:
             post = site_db.get_news_post(id)
+            remove_file(f'static/{post[-1]}')
             site_db.delete_news_post(id)
             flash('"{}" was successfully deleted!'.format(post[2]))
             app.logger.info(f"{request.remote_addr}-{session['username']} : deleted news <id: {id}>")
@@ -417,6 +418,7 @@ def delete_olymp(id):
     try:
         if current_user.is_authenticated:
             post = site_db.get_olympiad_post(id)
+            remove_file(f'static/{post[-1]}')
             site_db.delete_olympiad_post(id)
             flash('"{}" was successfully deleted!'.format(post[2]))
             app.logger.info(f"{request.remote_addr}-{session['username']} : deleted olympiad <id: {id}>")

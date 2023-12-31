@@ -1,6 +1,7 @@
 from config import ALLOWED_EXTENSIONS
 from flask import flash, request, redirect
 from werkzeug.utils import secure_filename
+import os
 
 
 def allowed_file(filename):
@@ -33,3 +34,11 @@ def upload_file():
         file.save(f"static/img/{filename}")
         img_path = f"img/{filename}"
         return img_path
+
+
+def remove_file(file_path: str):
+    """Remove a file from disk by its path"""
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    else:
+        print("The file does not exist")
