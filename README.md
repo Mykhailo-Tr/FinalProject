@@ -63,9 +63,11 @@ $ pip3 install -r requirements.txt
 ```
 UPLOAD_FOLDER = '/static/img' # or your path for images
 ALLOWED_EXTENSIONS = {'png'} # you can add others
+LOGGER_CONFIG_FILE = 'data/logging_config.yaml' or your config
+SQL_SCHEMA_FILE = 'data/schema.sql'
 DATABASE_FILE = '<database file>'
 SQLALCHEMY_DATABASE = 'sqlite:///<database file>'
-JSON_FILE = '<json file>'
+JSON_FILE = 'data/titles.json' or your titles file (.json)
 SECRET_KEY = '<your secret key for flask app>'
 
 ```

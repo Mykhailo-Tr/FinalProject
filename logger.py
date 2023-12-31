@@ -1,9 +1,10 @@
+from config import LOGGER_CONFIG_FILE
 import logging.config
 import yaml
 
 
 # Load YAML configuration from file
-with open('logging_config.yaml', 'rt') as f:
+with open(LOGGER_CONFIG_FILE, 'rt') as f:
     config = yaml.safe_load(f.read())
 
 # Configure logging
