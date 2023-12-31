@@ -58,6 +58,8 @@ List any prerequisites or dependencies required to run the project.
   </a>
 </p>
 
+
+
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="#how-to-use">How To Use</a> •
@@ -68,6 +70,18 @@ List any prerequisites or dependencies required to run the project.
 </p>
 
 ![screenshot](https://raw.githubusercontent.com/amitmerchant1990/electron-markdownify/master/app/img/markdownify.gif)
+
+## I utilize: 
+- `flask` as the web framework.
+- `jinja` templates the site and makes it dynamic.
+- `SQLite` for our database.
+- `flask-sqlalchemy` as our ORM.
+- `bootstrap` makes site beautiful.
+- `json` for simplify site editing.
+- `regex` for validation.
+- `logging` makes it easier to track changes and errors
+
+
 
 ## Key Features
 

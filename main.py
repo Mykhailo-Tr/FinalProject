@@ -1,7 +1,5 @@
 from flask import redirect, render_template, url_for, request, flash, session
 from flask_login import LoginManager, login_user, logout_user, current_user
-from werkzeug.exceptions import abort, NotFound
-from markupsafe import escape
 from validation import Validator
 from decorators import handle_error, check_auth
 from core import upload_file
