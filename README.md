@@ -73,6 +73,9 @@ SECRET_KEY = '<your secret key for flask app>'
 ```
 
 ```bash
+# Init database
+$ python3 init_db.py
+
 # Run the main.py
 $ python3 main.py
 ```
